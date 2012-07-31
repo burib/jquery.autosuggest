@@ -63,14 +63,14 @@
              $suggestFields.find('.' + plugin.settings.resultsClass);
            });
 
-           resultsField.delegate('li', 'click', function (e) {
+           resultsField.on('li', 'click', function (e) {
               suggestField.trigger('focus');
               selectList.selectItem(wrapperField, resultsField, selectsField, this, e);
-           }).delegate('li', 'hover', function () {
+           }).on('li', 'hover', function () {
               selectList.navigate('hover', resultsField, null, $(this));
            });
 
-           selectsField.delegate('span.'+plugin.settings.removeClass, 'click', function (e) {
+           selectsField.on('span.'+plugin.settings.removeClass, 'click', function (e) {
               selectList.removeItem(wrapperField, resultsField, selectsField, $(this).parent(), e);
            });
 
@@ -89,7 +89,7 @@
       }
 
       function prepareSuggestFields() {
-            var $t, // will be a local variable of each autosuggest field
+            var $this, // will be a local variable of each autosuggest field
                 fieldId,
                 isInput,
                 isMultiSelect;
@@ -97,16 +97,16 @@
             $suggestFields = $form.find('.' + plugin.settings.fieldsClass); //finds the elements that the autosuggest has to be prepared on
 
             $suggestFields.each(function (index, value) {
-                $t = $(value);
-                fieldId = $t[0].id + index;
-                isInput = $t[0].nodeName.toLowerCase() === "input";
-                isMultiSelect = $t.prop('multiple');
+                $this = $(value);
+                fieldId = $this[0].id + index;
+                isInput = $this[0].nodeName.toLowerCase() === "input";
+                isMultiSelect = $this.prop('multiple');
 
                 if ( !isInput ) {
-                   $t.hide().wrap($('<span id="' + plugin.settings.wrapperPrefix + "_" + fieldId + '" class="' + plugin.settings.wrapperClass + '"></span>')).after($('<ul class="' + plugin.settings.selectsClass + '"></ul>')).after($('<ul class="' + plugin.settings.resultsClass + '"></ul>')).before($('<input class="' + plugin.settings.fieldsClass + '" autosuggest="false" multiselect="' + isMultiSelect + '" />'));
+                   $this.hide().wrap($('<span id="' + plugin.settings.wrapperPrefix + "_" + fieldId + '" class="' + plugin.settings.wrapperClass + '"></span>')).after($('<ul class="' + plugin.settings.selectsClass + '"></ul>')).after($('<ul class="' + plugin.settings.resultsClass + '"></ul>')).before($('<input class="' + plugin.settings.fieldsClass + '" autosuggest="false" multiselect="' + isMultiSelect + '" />'));
                 }
                 else {
-                   $t.attr('autosuggest', false).wrap($('<span id="' + plugin.settings.wrapperPrefix + "_" + fieldId + '" class="' + plugin.settings.wrapperClass + '"></span>')).after($('<ul class="' + plugin.settings.selectsClass + '"></ul>')).after($('<ul class="' + plugin.settings.resultsClass + '"></ul>')).after($('<select name="' + $t.attr('name') + '" multiple="' + isMultiSelect + '"></select>').hide()).removeAttr('name');
+                   $this.attr('autosuggest', false).wrap($('<span id="' + plugin.settings.wrapperPrefix + "_" + fieldId + '" class="' + plugin.settings.wrapperClass + '"></span>')).after($('<ul class="' + plugin.settings.selectsClass + '"></ul>')).after($('<ul class="' + plugin.settings.resultsClass + '"></ul>')).after($('<select name="' + $this.attr('name') + '" multiple="' + isMultiSelect + '"></select>').hide()).removeAttr('name');
                 }
             });
 
@@ -130,11 +130,25 @@
         timer = setTimeout(function(){
             if (query.length > plugin.settings.minChars) {
               item.addClass(plugin.settings.loadingClass);
-              prototype.seo_service.api.getResponse(function(response) {
-                setSuggestList(response[1].matchedResults, item);
-                //datasource
-                item.removeClass(plugin.settings.loadingClass);
-              });
+
+              var matchedResults = [
+                {
+                  "key" : "001",
+                  "value" : "banana"
+                },
+                {
+                  "key" : "002",
+                  "value" : "apple"
+                },
+                {
+                  "key" : "003",
+                  "value" : "melon"
+                }
+              ];
+              //datasource
+              setSuggestList(matchedResults, item);
+              item.removeClass(plugin.settings.loadingClass);
+
             }
         }, plugin.settings.delay);
 
@@ -154,21 +168,19 @@
             pattern = new RegExp(preg_quote(query), 'gi'),
             item;
 
-
         resultsField.empty();
-        for (var key in results){
-            if (plugin.settings.resultsLimit === -1 || resultsIndex < plugin.settings.resultsLimit ) {
+        for (; resultsIndex < results.length; resultsIndex++) {
+          if (plugin.settings.resultsLimit === -1 || resultsIndex < plugin.settings.resultsLimit ) {
 
-              if (!!results[key].match(pattern) ) {
-                item = results[key].replace(pattern, "<span class=\"" + plugin.settings.highlightClass + "\">$&</span>");
-                resultsField.append($('<li data-key="' +key+ '">' + item + '<span class="' + plugin.settings.removeClass + '">' + plugin.settings.removeText + '</span></li>'));
-                resultsIndex++;
-              }
+            if (!!results[resultsIndex].value.match(pattern) ) {
+              item = results[resultsIndex].value.replace(pattern, "<span class=\"" + plugin.settings.highlightClass + "\">$&</span>");
+              resultsField.append($('<li data-key="' +results[resultsIndex].key+ '">' + item + '<span class="' + plugin.settings.removeClass + '">' + plugin.settings.removeText + '</span></li>'));
             }
-            else {
-              return;
-            }
-        }
+          }
+          else {
+            return;
+          }
+        };
       }
 
       var selectList = {};
