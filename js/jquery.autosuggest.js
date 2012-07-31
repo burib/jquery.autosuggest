@@ -78,13 +78,12 @@
 
 
          $('body').bind('click', function (e) {
-             var resultsField = $(e.target).parents('.' + plugin.settings.wrapperClass).find('.' + plugin.settings.resultsClass);
-             selectList.hide($('.' + plugin.settings.resultsClass), e);
-             if ( resultsField.length > 0 ) {
-               selectList.show(resultsField, e);
-             }
-           });
-
+           var resultsField = $(e.target).parents('.' + plugin.settings.wrapperClass).find('.' + plugin.settings.resultsClass);
+           selectList.hide($('.' + plugin.settings.resultsClass), e);
+           if ( resultsField.length > 0 ) {
+             selectList.show(resultsField, e);
+           }
+         });
 
       }
 
@@ -117,7 +116,6 @@
       function autosuggest(e, item) {
         var query = $.trim(item.val()),
             timer = null;
-
 
         /*var dataSource = plugin.settings.dataSource();
         console.log( dataSource );
@@ -243,7 +241,7 @@
 
 
       plugin.init = function() {
-         plugin.settings = $.extend({}, defaults, options);   //overwrite the default options
+         plugin.settings = $.extend({}, defaults, options);   //override the default options
          prepareSuggestFields();
       }();
    };
